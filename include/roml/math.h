@@ -18,7 +18,7 @@ namespace roml
 
     public:
         Matrix(const size_t rows, const size_t cols, std::vector<T> elements);
-        void transpose();
+        Matrix transpose();
 
         T at(size_t row, size_t col) const;
 
@@ -36,6 +36,16 @@ namespace roml
     {
         assert(rows * cols == elements.size());
         this->elements = std::vector(elements);
+    }
+
+    template <typename T>
+    Matrix<T> Matrix<T>::transpose()
+    {
+        int swap = this->rows;
+        this->rows = this->cols;
+        this->cols = swap;
+
+        return *this;
     }
 
     template <typename T>

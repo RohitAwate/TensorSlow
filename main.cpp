@@ -21,6 +21,7 @@ int main()
     print(col_mat);
 
     print(row_mat.dot(col_mat));
+    print(row_mat.transpose());
 
     return 0;
 }
