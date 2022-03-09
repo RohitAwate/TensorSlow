@@ -25,6 +25,7 @@ namespace roml
         Matrix operator+(const Matrix &) const;
         Matrix operator-(const Matrix &) const;
         Matrix dot(const Matrix &) const;
+        Matrix scale(const T scalar);
 
         template <typename U>
         friend std::ostream &operator<<(std::ostream &, const Matrix<U> &);
@@ -114,6 +115,16 @@ namespace roml
         }
 
         return Matrix(this->rows, other.cols, product);
+    }
+
+    template <typename T>
+    Matrix<T> Matrix<T>::scale(const T scalar)
+    {
+        for (auto& i : this->elements) {
+            i = scalar * i;
+        }
+
+        return *this;
     }
 
     template <typename T>

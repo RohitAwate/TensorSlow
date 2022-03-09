@@ -23,5 +23,7 @@ int main()
     print(row_mat.dot(col_mat));
     print(row_mat.transpose());
 
+    print(row_mat.scale(2));
+
     return 0;
 }
