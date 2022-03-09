@@ -8,10 +8,11 @@ project(
     HOMEPAGE_URL "https://github.com/RohitAwate/roml/"
 )
 
-set(SRC
-    src/roml/math/vector.cpp
-    src/roml/math/matrix.cpp
-)
+# set(LIB_SRC)
 
-add_library(romlib SHARED ${SRC})
-target_include_directories(romlib PUBLIC include)
+add_executable(main main.cpp)
+# target_link_libraries(main romlib)
+target_include_directories(main PUBLIC include)
+
+# add_library(romlib SHARED ${LIB_SRC})
+# target_include_directories(romlib PUBLIC include)

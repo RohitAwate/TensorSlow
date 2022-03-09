@@ -3,6 +3,7 @@
 #include <cassert>
 #include <iostream>
 #include <iterator>
+#include <vector>
 
 namespace roml
 {
@@ -12,28 +13,38 @@ namespace roml
     private:
         size_t rows;
         size_t cols;
-        T **elements;
+        std::vector<T> elements;
         Matrix(const size_t rows, const size_t cols);
 
     public:
-        Matrix(const size_t rows, const size_t cols, T **elements);
+        Matrix(const size_t rows, const size_t cols, std::vector<T> elements);
         void transpose();
+
+        T at(size_t row, size_t col) const;
+
         Matrix operator+(const Matrix &) const;
         Matrix operator-(const Matrix &) const;
-        Matrix operator*(const Matrix &) const;
-        Matrix &operator[](int i) const;
+        Matrix dot(const Matrix &) const;
 
         template <typename U>
         friend std::ostream &operator<<(std::ostream &, const Matrix<U> &);
     };
 
     template <typename T>
-    Matrix<T>::Matrix(const size_t rows, const size_t cols, T **elements)
+    Matrix<T>::Matrix(const size_t rows, const size_t cols, std::vector<T> elements)
         : rows(rows), cols(cols)
     {
-        // assert(this->rows == std::size(elements));
-        // assert(this->rows == std::size(elements[0]));
-        this->elements = elements;
+        assert(rows * cols == elements.size());
+        this->elements = std::vector(elements);
+    }
+
+    template <typename T>
+    T Matrix<T>::at(size_t row, size_t col) const
+    {
+        assert(row < this->rows);
+        assert(col < this->cols);
+
+        return this->elements[row * this->cols + col];
     }
 
     template <typename T>
@@ -42,19 +53,17 @@ namespace roml
         assert(this->rows == other.rows);
         assert(this->cols == other.cols);
 
-        T **sum = new T *[rows];
+        std::vector<T> sum(this->rows * this->cols);
 
         for (size_t i = 0; i < this->rows; i++)
         {
-            sum[i] = new T[this->cols];
-
             for (size_t j = 0; j < this->cols; j++)
             {
-                sum[i][j] = this->elements[i][j] + other.elements[i][j];
+                sum[i * this->cols + j] = this->at(i, j) + other.at(i, j);
             }
         }
 
-        return *new Matrix(this->rows, this->cols, sum);
+        return Matrix(this->rows, this->cols, sum);
     }
 
     template <typename T>
@@ -63,51 +72,50 @@ namespace roml
         assert(this->rows == other.rows);
         assert(this->cols == other.cols);
 
-        T **sum = new T *[rows];
+        std::vector<T> diff(this->rows * this->cols);
 
         for (size_t i = 0; i < this->rows; i++)
         {
-            sum[i] = new T[this->cols];
-
             for (size_t j = 0; j < this->cols; j++)
             {
-                sum[i][j] = this->elements[i][j] - other.elements[i][j];
+                diff[i * this->cols + j] = this->at(i, j) - other.at(i, j);
             }
         }
 
-        return Matrix(this->rows, this->cols, sum);
+        return Matrix(this->rows, this->cols, diff);
     }
 
     template <typename T>
-    Matrix<T> Matrix<T>::operator*(const Matrix &other) const
+    Matrix<T> Matrix<T>::dot(const Matrix &other) const
     {
         assert(this->rows == other.cols);
 
-        T **sum = new T *[rows];
+        std::vector<T> product(this->rows * other.cols, 0);
 
         for (size_t i = 0; i < this->rows; i++)
         {
-            sum[i] = new T[this->cols];
-
-            for (size_t j = 0; j < this->cols; j++)
+            for (size_t j = 0; j < other.cols; j++)
             {
-                sum[i][j] = this->elements[i][j] + other.elements[i][j];
+                for (size_t k = 0; k < this->cols; k++)
+                {
+                    product[i * other.cols + j] += this->at(i, k) * other.at(k, j);
+                }
             }
         }
 
-        return Matrix(this->rows, this->cols, sum);
+        return Matrix(this->rows, other.cols, product);
     }
 
     template <typename T>
     std::ostream &operator<<(std::ostream &os, const Matrix<T> &m)
     {
-        os << std::printf("<Matrix %zux%zu>[", m.rows, m.cols);
+        os << "[";
 
         for (size_t i = 0; i < m.rows; i++)
         {
             for (size_t j = 0; j < m.cols; j++)
             {
-                os << m.elements[i][j];
+                os << m.at(i, j);
 
                 if (j != m.cols - 1)
                 {
@@ -116,7 +124,9 @@ namespace roml
             }
 
             if (i != m.rows - 1)
+            {
                 os << " | ";
+            }
         }
 
         os << "]";
