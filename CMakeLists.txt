@@ -2,10 +2,10 @@ cmake_minimum_required(VERSION 3.16)
 set(CMAKE_CXX_STANDARD 20)
 
 project(
-    tensorslow
+    TensorSlow
     VERSION 0.0.1
     DESCRIPTION "A naive, non-optimized machine learning library for education."
-    HOMEPAGE_URL "https://github.com/RohitAwate/tensorslow/"
+    HOMEPAGE_URL "https://github.com/RohitAwate/TensorSlow/"
 )
 
 # set(LIB_SRC)
