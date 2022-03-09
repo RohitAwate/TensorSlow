@@ -1,11 +1,12 @@
 #pragma once
 
 #include <cassert>
+#include <cmath>
 #include <iostream>
 #include <iterator>
 #include <vector>
 
-namespace roml
+namespace ts
 {
     template <typename T>
     class Matrix
@@ -21,11 +22,14 @@ namespace roml
         Matrix transpose();
 
         T at(size_t row, size_t col) const;
+        Matrix dim() const;
+
+        Matrix scale(const T scalar);
+        double l2() const;
 
         Matrix operator+(const Matrix &) const;
         Matrix operator-(const Matrix &) const;
-        Matrix dot(const Matrix &) const;
-        Matrix scale(const T scalar);
+        Matrix operator*(const Matrix &) const;
 
         template <typename U>
         friend std::ostream &operator<<(std::ostream &, const Matrix<U> &);
@@ -42,11 +46,7 @@ namespace roml
     template <typename T>
     Matrix<T> Matrix<T>::transpose()
     {
-        int swap = this->rows;
-        this->rows = this->cols;
-        this->cols = swap;
-
-        return *this;
+        return Matrix(this->cols, this->rows, this->elements);
     }
 
     template <typename T>
@@ -56,6 +56,41 @@ namespace roml
         assert(col < this->cols);
 
         return this->elements[row * this->cols + col];
+    }
+
+    template <typename T>
+    Matrix<T> Matrix<T>::dim() const
+    {
+        return Matrix(1, 2, std::vector<T>{this->rows, this->cols});
+    }
+
+    template <typename T>
+    Matrix<T> Matrix<T>::scale(const T scalar)
+    {
+        for (auto &i : this->elements)
+        {
+            i = scalar * i;
+        }
+
+        return *this;
+    }
+
+    template <typename T>
+    double Matrix<T>::l2() const
+    {
+        assert(this->rows == 1 || this->cols == 1);
+
+        double l2_val = 0.0;
+
+        for (size_t i = 0; i < this->rows; i++)
+        {
+            for (size_t j = 0; j < this->cols; j++)
+            {
+                l2_val += pow(this->at(i, j), 2);
+            }
+        }
+
+        return pow(l2_val, 0.5);
     }
 
     template <typename T>
@@ -97,9 +132,9 @@ namespace roml
     }
 
     template <typename T>
-    Matrix<T> Matrix<T>::dot(const Matrix &other) const
+    Matrix<T> Matrix<T>::operator*(const Matrix &other) const
     {
-        assert(this->rows == other.cols);
+        assert(this->cols == other.rows);
 
         std::vector<T> product(this->rows * other.cols, 0);
 
@@ -115,16 +150,6 @@ namespace roml
         }
 
         return Matrix(this->rows, other.cols, product);
-    }
-
-    template <typename T>
-    Matrix<T> Matrix<T>::scale(const T scalar)
-    {
-        for (auto& i : this->elements) {
-            i = scalar * i;
-        }
-
-        return *this;
     }
 
     template <typename T>
@@ -155,4 +180,4 @@ namespace roml
         return os;
     }
 
-} // namespace roml
+} // namespace ts
