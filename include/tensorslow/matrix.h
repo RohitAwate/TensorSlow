@@ -1,5 +1,7 @@
 #pragma once
 
+#include "tensorslow/util.h"
+
 #include <cassert>
 #include <cmath>
 #include <iostream>
@@ -18,6 +20,9 @@ namespace ts
         Matrix(const size_t rows, const size_t cols);
 
     public:
+        /**
+         * elements should be in row-major order
+         */
         Matrix(const size_t rows, const size_t cols, std::vector<T> elements);
         Matrix transpose();
 
@@ -46,7 +51,17 @@ namespace ts
     template <typename T>
     Matrix<T> Matrix<T>::transpose()
     {
-        return Matrix(this->cols, this->rows, this->elements);
+        std::vector<T> trans_elements(this->rows * this->cols);
+
+        for (size_t i = 0; i < this->rows; i++)
+        {
+            for (size_t j = 0; j < this->cols; j++)
+            {
+                trans_elements[j * this->rows + i] = this->at(i, j);
+            }
+        }
+
+        return Matrix(this->cols, this->rows, trans_elements);
     }
 
     template <typename T>

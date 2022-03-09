@@ -1,8 +1,6 @@
-#include <tensorslow/math.h>
+#include <tensorslow/matrix.h>
 
 #include <iostream>
-
-#define print(x) std::cout << (x) << std::endl
 
 int main()
 {
