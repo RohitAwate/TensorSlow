@@ -23,10 +23,9 @@ int main()
                                   1,
                               });
     auto x_t = x.transpose();
-    auto y = ts::Matrix(1, 7, std::vector<float>{368, 340, 665, 954, 331, 556, 376});
+    auto y = ts::Matrix(7, 1, std::vector<float>{368, 340, 665, 954, 331, 556, 376});
     auto theta = ts::Matrix(2, 1, std::vector<float>{0.0, 0.0});
-    float learning_rate = 0.01;
-    auto product = x_t * y * theta;
+    float learning_rate = 0.001;
 
     auto gradient = x_t * x * theta - x_t * y;
 
