@@ -25,13 +25,13 @@ namespace ts
          */
         Matrix();
         Matrix(const size_t rows, const size_t cols, std::vector<T> elements);
-        Matrix(const Matrix& copy);
+        Matrix(const Matrix &copy);
         Matrix transpose() const;
 
         T at(size_t row, size_t col) const;
         Matrix<size_t> dim() const;
 
-        Matrix& scale(const T scalar);
+        Matrix &scale(const T scalar);
         double l2() const;
 
         Matrix operator+(const Matrix &) const;
@@ -44,7 +44,8 @@ namespace ts
 
     template <typename T>
     Matrix<T>::Matrix() : rows(0), cols(0)
-    {}
+    {
+    }
 
     template <typename T>
     Matrix<T>::Matrix(const size_t rows, const size_t cols, std::vector<T> elements)
@@ -94,7 +95,7 @@ namespace ts
     }
 
     template <typename T>
-    Matrix<T>& Matrix<T>::scale(const T scalar)
+    Matrix<T> &Matrix<T>::scale(const T scalar)
     {
         for (auto &i : this->elements)
         {
