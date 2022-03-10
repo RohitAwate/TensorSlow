@@ -1,6 +1,6 @@
-#include <tensorslow/matrix.h>
-
 #include <iostream>
+
+#include "tensorslow/matrix.h"
 
 int main()
 {
