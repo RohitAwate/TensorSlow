@@ -23,13 +23,15 @@ namespace ts
         /**
          * elements should be in row-major order
          */
+        Matrix();
         Matrix(const size_t rows, const size_t cols, std::vector<T> elements);
-        Matrix transpose();
+        Matrix(const Matrix& copy);
+        Matrix transpose() const;
 
         T at(size_t row, size_t col) const;
-        Matrix dim() const;
+        Matrix<size_t> dim() const;
 
-        Matrix scale(const T scalar);
+        Matrix& scale(const T scalar);
         double l2() const;
 
         Matrix operator+(const Matrix &) const;
@@ -41,6 +43,10 @@ namespace ts
     };
 
     template <typename T>
+    Matrix<T>::Matrix() : rows(0), cols(0)
+    {}
+
+    template <typename T>
     Matrix<T>::Matrix(const size_t rows, const size_t cols, std::vector<T> elements)
         : rows(rows), cols(cols)
     {
@@ -49,7 +55,15 @@ namespace ts
     }
 
     template <typename T>
-    Matrix<T> Matrix<T>::transpose()
+    Matrix<T>::Matrix(const Matrix<T> &copy)
+    {
+        this->rows = rows;
+        this->cols = cols;
+        this->elements = elements;
+    }
+
+    template <typename T>
+    Matrix<T> Matrix<T>::transpose() const
     {
         std::vector<T> trans_elements(this->rows * this->cols);
 
@@ -74,13 +88,13 @@ namespace ts
     }
 
     template <typename T>
-    Matrix<T> Matrix<T>::dim() const
+    Matrix<size_t> Matrix<T>::dim() const
     {
-        return Matrix(1, 2, std::vector<T>{this->rows, this->cols});
+        return Matrix<size_t>(1, 2, std::vector<size_t>{this->rows, this->cols});
     }
 
     template <typename T>
-    Matrix<T> Matrix<T>::scale(const T scalar)
+    Matrix<T>& Matrix<T>::scale(const T scalar)
     {
         for (auto &i : this->elements)
         {
