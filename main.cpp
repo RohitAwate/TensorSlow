@@ -23,5 +23,8 @@ int main()
 
     print(row_mat.scale(2));
 
+    auto col_mat_2 = ts::Matrix(3, 1, std::vector{4, 5, 6});
+    print(col_mat.append_cols(col_mat_2));
+
     return 0;
 }

@@ -26,8 +26,9 @@ namespace ts
         Matrix();
         Matrix(const size_t rows, const size_t cols, std::vector<T> elements);
         Matrix(const Matrix &copy);
-        
+
         Matrix transpose() const;
+        Matrix &append_cols(const Matrix<T> &);
 
         T at(size_t row, size_t col) const;
         Matrix<size_t> dim() const;
@@ -78,6 +79,21 @@ namespace ts
         }
 
         return Matrix(this->cols, this->rows, trans_elements);
+    }
+
+    template <typename T>
+    Matrix<T> &Matrix<T>::append_cols(const Matrix<T> &col_mat)
+    {
+        assert(this->rows == col_mat.rows);
+
+        this->elements.insert(
+            this->elements.end(),
+            col_mat.elements.begin(),
+            col_mat.elements.end());
+
+        this->cols += col_mat.cols;
+
+        return *this;
     }
 
     template <typename T>
