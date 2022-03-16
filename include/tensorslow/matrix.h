@@ -30,7 +30,8 @@ namespace ts
         Matrix transpose() const;
         Matrix &append_cols(const Matrix<T> &);
 
-        T at(size_t row, size_t col) const;
+        inline T at(size_t row, size_t col) const;
+
         Matrix<size_t> dim() const;
 
         Matrix &scale(const T scalar);
@@ -60,9 +61,9 @@ namespace ts
     template <typename T>
     Matrix<T>::Matrix(const Matrix<T> &copy)
     {
-        this->rows = rows;
-        this->cols = cols;
-        this->elements = elements;
+        this->rows = copy.rows;
+        this->cols = copy.cols;
+        this->elements = copy.elements;
     }
 
     template <typename T>
@@ -74,7 +75,7 @@ namespace ts
         {
             for (size_t j = 0; j < this->cols; j++)
             {
-                trans_elements[j * this->rows + i] = this->at(i, j);
+                trans_elements[i * this->cols + j] = this->at(i, j);
             }
         }
 
