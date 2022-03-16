@@ -4,7 +4,7 @@
 
 int main()
 {
-    auto m1 = ts::Matrix(2, 2, std::vector{1, 2, 3, 4});
+    auto m1 = ts::Matrix(2, 2, std::vector{1, 3, 2, 4});
     print(m1);
 
     auto m2 = ts::Matrix(2, 1, std::vector{5, 6});
@@ -18,7 +18,7 @@ int main()
     auto col_mat = ts::Matrix(3, 1, std::vector{1, 2, 3});
     print(col_mat);
 
-    print(row_mat* col_mat);
+    print(row_mat * col_mat);
     print(row_mat.transpose());
 
     print(row_mat.scale(2));

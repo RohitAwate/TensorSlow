@@ -21,11 +21,12 @@ namespace ts
 
     public:
         /**
-         * elements should be in row-major order
+         * elements should be in column-major order
          */
         Matrix();
         Matrix(const size_t rows, const size_t cols, std::vector<T> elements);
         Matrix(const Matrix &copy);
+        
         Matrix transpose() const;
 
         T at(size_t row, size_t col) const;
@@ -85,7 +86,7 @@ namespace ts
         assert(row < this->rows);
         assert(col < this->cols);
 
-        return this->elements[row * this->cols + col];
+        return this->elements[col * this->rows + row];
     }
 
     template <typename T>
@@ -135,7 +136,7 @@ namespace ts
         {
             for (size_t j = 0; j < this->cols; j++)
             {
-                sum[i * this->cols + j] = this->at(i, j) + other.at(i, j);
+                sum[j * this->rows + i] = this->at(i, j) + other.at(i, j);
             }
         }
 
@@ -154,7 +155,7 @@ namespace ts
         {
             for (size_t j = 0; j < this->cols; j++)
             {
-                diff[i * this->cols + j] = this->at(i, j) - other.at(i, j);
+                diff[j * this->rows + i] = this->at(i, j) - other.at(i, j);
             }
         }
 
@@ -174,7 +175,7 @@ namespace ts
             {
                 for (size_t k = 0; k < this->cols; k++)
                 {
-                    product[i * other.cols + j] += this->at(i, k) * other.at(k, j);
+                    product[j * this->rows + i] += this->at(i, k) * other.at(k, j);
                 }
             }
         }
