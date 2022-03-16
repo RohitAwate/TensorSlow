@@ -8,3 +8,9 @@
 - overload == operator for Matrix
 - make it easy to toggle between row and column major representations internally
     - this might help operations such as append column/row
+- move linear model impl to a .cpp file and build library out of it
+- dim() API is too tedious
+    - get a way to retrieve rows and cols directly
+- convert gradient descent to a class which inherits from Optimizer
+    - add an API like model.fit(Optimizer)
+- use doubles everywhere instead of float

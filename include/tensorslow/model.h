@@ -20,8 +20,8 @@ namespace ts
         class LinearModel : public Model<T>
         {
         private:
-            const ts::Matrix<T> &x;
-            const ts::Matrix<T> &y;
+            const ts::Matrix<T> x;
+            const ts::Matrix<T> y;
             const ts::Matrix<T> x_t;
 
         public:
@@ -31,8 +31,18 @@ namespace ts
         };
 
         template <typename T>
+        static Matrix<T> append_ones_to_x(const ts::Matrix<T> &x)
+        {
+            Matrix<T> new_x(x);
+            auto x_rows = x.dim().at(0, 0);
+            auto ones = ts::Matrix(x_rows, 1, std::vector<float>(x_rows, 1.0f));
+            new_x.append_cols(ones);
+            return new_x;
+        }
+
+        template <typename T>
         LinearModel<T>::LinearModel(const ts::Matrix<T> &x, const ts::Matrix<T> &y)
-            : x(x), y(y), x_t(x.transpose())
+            : x(append_ones_to_x(x)), y(y), x_t(this->x.transpose())
         {
         }
 
