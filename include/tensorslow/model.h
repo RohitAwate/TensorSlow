@@ -12,7 +12,7 @@ namespace ts
         class Model
         {
         public:
-            virtual ts::Matrix<T> gradient(const Matrix<T> &theta) const = 0;
+            virtual ts::Matrix<T> gradient(const Matrix<T> &params) const = 0;
             virtual size_t get_features_count() const = 0;
         };
 
@@ -26,7 +26,7 @@ namespace ts
 
         public:
             LinearModel(const ts::Matrix<T> &x, const ts::Matrix<T> &y);
-            virtual ts::Matrix<T> gradient(const Matrix<T> &theta) const;
+            virtual ts::Matrix<T> gradient(const Matrix<T> &params) const;
             virtual size_t get_features_count() const;
         };
 
@@ -47,9 +47,9 @@ namespace ts
         }
 
         template <typename T>
-        ts::Matrix<T> LinearModel<T>::gradient(const Matrix<T> &theta) const
+        ts::Matrix<T> LinearModel<T>::gradient(const Matrix<T> &params) const
         {
-            return x_t * x * theta - x_t * y;
+            return x_t * x * params - x_t * y;
         }
 
         template <typename T>
