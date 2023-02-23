@@ -1,0 +1,17 @@
+https://github.com/myleott/mnist_png
+
+https://www.youtube.com/watch?v=pauPCy_s0Ok&list=WL&index=15
+https://github.com/TheIndependentCode/Neural-Network/
+
+https://analyticsindiamag.com/guide-to-feed-forward-network-using-pytorch-with-mnist-dataset/
+
+https://www.youtube.com/watch?v=ErfnhcEV1O8
+entropy, cross entropy, shannon by the french guy
+
+
+https://github.com/ddbourgin/numpy-ml/blob/master/numpy_ml/neural_nets/losses/losses.py#L110-L222
+https://github.com/ddbourgin/numpy-ml/blob/b0359af5285fbf9699d64fd5ec059493228af03e/numpy_ml/utils/testing.py#L30
+https://gombru.github.io/2018/05/23/cross_entropy_loss/
+
+
+https://www.youtube.com/watch?v=VMj-3S1tku0
