@@ -1,6 +1,5 @@
-from typing import Optional, Union
+from typing import Union
 from collections import deque
-
 
 import numpy as np
 
@@ -102,6 +101,21 @@ class Tensor:
         self.grad_fn = pow_backward
         return out
 
+    def dot(self, other):
+        graph = {"prev": (self, other), "op": "dot"}
+        out = Tensor(np.dot(self.arr, other.arr), _graph=graph)
+
+        def dot_backward():
+            self_local = other.arr
+            other_local = self.arr
+            upstream_grad = out.grad
+
+            self.grad = np.dot(upstream_grad, other_local.T)
+            other.grad = np.dot(self_local.T, upstream_grad)
+
+        self.grad_fn = dot_backward
+        return out
+
     def _get_topsorted_graph(self):
         topsorted_graph = []
 
@@ -113,7 +127,7 @@ class Tensor:
 
             if curr in visited:
                 continue
-            
+
             topsorted_graph.append(curr)
             visited.add(curr)
 
