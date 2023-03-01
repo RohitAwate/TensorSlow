@@ -1,6 +1,9 @@
 from typing import Optional, Union
+from collections import deque
+
 
 import numpy as np
+
 
 class Tensor:
     TensorInitializerType = Union[list, tuple, np.ndarray]
@@ -13,12 +16,16 @@ class Tensor:
         # Grad stuff
         self.requires_grad = requires_grad
         self.grad = np.zeros(self.arr.shape)
-        self.grad_fn = lambda: pass
+        self.grad_fn = lambda: None
         self._graph = _graph
 
     def backward(self):
         assert self.requires_grad, "Tensor does not require grad"
-        self.grad_fn()
+
+        # Backpropagate gradients in reverse order
+        self.grad = np.ones(self.grad.shape)
+        for node in self._get_topsorted_graph():
+            node.grad_fn()
 
     def __add__(self, other):
         graph = {"prev": (self, other), "op": "+"}
@@ -29,8 +36,8 @@ class Tensor:
             other_local = 1.0
             upstream_grad = out.grad
 
-            self.grad = self_local * upstream_grad
-            other.grad = other_local * upstream_grad
+            self.grad += self_local * upstream_grad
+            other.grad += other_local * upstream_grad
 
         self.grad_fn = add_backward
         return out
@@ -44,8 +51,8 @@ class Tensor:
             other_local = -1.0
             upstream_grad = out.grad
 
-            self.grad = self_local * upstream_grad
-            other.grad = other_local * upstream_grad
+            self.grad += self_local * upstream_grad
+            other.grad += other_local * upstream_grad
 
         self.grad_fn = sub_backward
         return out
@@ -59,8 +66,8 @@ class Tensor:
             other_local = self.arr
             upstream_grad = out.grad
 
-            self.grad = self_local * upstream_grad
-            other.grad = other_local * upstream_grad
+            self.grad += self_local * upstream_grad
+            other.grad += other_local * upstream_grad
 
         self.grad_fn = mul_backward
         return out
@@ -74,8 +81,8 @@ class Tensor:
             other_local = np.negative(self.arr) / np.square(other.arr)
             upstream_grad = out.grad
 
-            self.grad = self_local * upstream_grad
-            other.grad = other_local * upstream_grad
+            self.grad += self_local * upstream_grad
+            other.grad += other_local * upstream_grad
 
         self.grad_fn = div_backward
         return out
@@ -89,11 +96,32 @@ class Tensor:
             other_local = out.arr * np.log(self.arr)
             upstream_grad = out.grad
 
-            self.grad = self_local * upstream_grad
-            other.grad = other_local * upstream_grad
+            self.grad += self_local * upstream_grad
+            other.grad += other_local * upstream_grad
 
         self.grad_fn = pow_backward
         return out
+
+    def _get_topsorted_graph(self):
+        topsorted_graph = []
+
+        queue = deque([self])
+        visited = set()
+
+        while queue:
+            curr = queue.popleft()
+
+            if curr in visited:
+                continue
+            
+            topsorted_graph.append(curr)
+            visited.add(curr)
+
+            prevs = curr._graph.get("prev", [])
+            for prev in prevs:
+                queue.append(prev)
+
+        return topsorted_graph
 
     def __getattr__(self, name):
         if hasattr(np.ndarray, name):
