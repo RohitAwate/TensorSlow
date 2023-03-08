@@ -20,10 +20,12 @@ class Tensor:
 
     def backward(self):
         assert self.requires_grad, "Tensor does not require grad"
+        assert self._graph, "Tensor does not have a gradient graph"
 
         # Backpropagate gradients in reverse order
         self.grad = np.ones(self.grad.shape)
         for node in self._get_topsorted_graph():
+            print(node.grad_fn)
             node.grad_fn()
 
     def __add__(self, other):
@@ -31,8 +33,8 @@ class Tensor:
         out = Tensor(self.arr + other.arr, _graph=graph)
 
         def add_backward():
-            self_local = 1.0
-            other_local = 1.0
+            self_local = np.ones(self.grad.shape)
+            other_local = np.ones(other.grad.shape)
             upstream_grad = out.grad
 
             self.grad += self_local * upstream_grad
@@ -75,7 +77,15 @@ class Tensor:
         graph = {"prev": (self, other), "op": "/"}
         out = Tensor(self.arr / other.arr, _graph=graph)
 
-        def div_backward():
+        """
+        Problem is that self is (100, 10) but other is (100, 1).
+        Broadcasting should take care of it.
+        But, while calculating other_local, we use self and thus, it gets
+        broadcasted to (100, 10). However, other's grad is (100, 1).
+        Thus, we cannot update the gradient.
+        """
+
+        def truediv_backward():
             self_local = 1 / other.arr
             other_local = np.negative(self.arr) / np.square(other.arr)
             upstream_grad = out.grad
@@ -83,7 +93,20 @@ class Tensor:
             self.grad += self_local * upstream_grad
             other.grad += other_local * upstream_grad
 
-        self.grad_fn = div_backward
+        self.grad_fn = truediv_backward
+        return out
+
+    def __neg__(self):
+        graph = {"prev": (self,), "op": "neg"}
+        out = Tensor(np.negative(self.arr), _graph=graph)
+
+        def neg_backward():
+            self_local = -1
+            upstream_grad = out.grad
+
+            self.grad += self_local * upstream_grad
+
+        self.grad_fn = neg_backward
         return out
 
     def __pow__(self, other):
@@ -91,7 +114,7 @@ class Tensor:
         out = Tensor(np.power(self.arr, other.arr), _graph=graph)
 
         def pow_backward():
-            self_local = np.power(self.arr, other.arr - 1) * out.grad
+            self_local = np.power(self.arr, other.arr - 1) * other.arr
             other_local = out.arr * np.log(self.arr)
             upstream_grad = out.grad
 
@@ -110,11 +133,47 @@ class Tensor:
             other_local = self.arr
             upstream_grad = out.grad
 
-            self.grad = np.dot(upstream_grad, other_local.T)
-            other.grad = np.dot(self_local.T, upstream_grad)
+            self.grad += np.dot(upstream_grad.T, other_local)
+            other.grad += np.dot(self_local, upstream_grad.T)
 
         self.grad_fn = dot_backward
         return out
+
+    def log(self):
+        graph = {"prev": (self,), "op": "log"}
+        out = Tensor(np.log(self.arr), _graph=graph)
+
+        def log_backward():
+            self_local = 1 / self.arr
+            upstream_grad = out.grad
+
+            self.grad += self_local * upstream_grad
+
+        self.grad_fn = log_backward
+        return out
+
+    def exp(self):
+        graph = {"prev": (self,), "op": "exp"}
+        out = Tensor(np.exp(self.arr), _graph=graph)
+
+        def exp_backward():
+            self_local = out.arr
+            upstream_grad = out.grad
+
+            self.grad += self_local * upstream_grad
+
+        self.grad_fn = exp_backward
+        return out
+
+    def transpose(self):
+        return Tensor(self.arr.T, requires_grad=self.requires_grad, _graph=self._graph)
+    
+    def mean(self, **kwargs):
+        return Tensor(self.arr.mean(**kwargs), requires_grad=self.requires_grad, _graph=self._graph)
+
+    @property
+    def T(self):
+        return self.transpose()
 
     def _get_topsorted_graph(self):
         topsorted_graph = []
@@ -136,6 +195,9 @@ class Tensor:
                 queue.append(prev)
 
         return topsorted_graph
+    
+    def __getitem__(self, key):
+        return Tensor(self.arr.__getitem__(key))
 
     def __getattr__(self, name):
         if hasattr(np.ndarray, name):
