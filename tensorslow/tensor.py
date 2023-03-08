@@ -185,6 +185,21 @@ class Tensor:
                 queue.append(prev)
 
         return topsorted_graph
+    
+    def __array__(self):
+        return self.arr
+    
+    def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
+        if method == "__call__":
+            unwrapped_inputs = []
+            for input in inputs:
+                if isinstance(input, Tensor):
+                    unwrapped_inputs.append(input.arr)
+                else:
+                    unwrapped_inputs.append(input)
+            return Tensor(ufunc(*unwrapped_inputs, **kwargs))
+        else:
+            return NotImplemented
 
     def __getitem__(self, key):
         return Tensor(self.arr.__getitem__(key))
@@ -200,4 +215,4 @@ class Tensor:
             )
 
     def __repr__(self):
-        return f"Tensor{self.arr}"
+        return f"Tensor<{self.arr}>"
