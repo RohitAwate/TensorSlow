@@ -14,15 +14,21 @@ def exp(a: Tensor) -> Tensor:
     return a.exp()
 
 
-def maximum(a: Tensor, b: Tensor) -> Tensor:
-    return Tensor(np.maximum(a.arr, b.arr))
+HANDLED_FUNCS = {}
 
 
+def implements(np_function):
+    def decorator(func):
+        HANDLED_FUNCS[np_function] = func
+        return func
+
+    return decorator
+
+@implements(np.max)
 def max(a: Tensor, **kwargs) -> Tensor:
     return Tensor(np.max(a.arr, **kwargs))
 
-
+@implements(np.sum)
 def sum(a: Tensor, **kwargs) -> Tensor:
     retval = Tensor(np.sum(a.arr, **kwargs))
-    print(a.shape, retval.shape, retval.grad.shape)
     return retval

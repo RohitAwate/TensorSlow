@@ -8,7 +8,7 @@ class Tensor:
     TensorInitializerType = Union[list, tuple, np.ndarray]
 
     def __init__(
-        self, arr: TensorInitializerType, requires_grad: bool = True, _graph: dict = {}
+        self, arr: TensorInitializerType, requires_grad: bool = False, _graph: dict = {}
     ):
         self.arr = np.array(arr) if type(arr) != np.ndarray else arr
 
@@ -165,6 +165,20 @@ class Tensor:
         self.grad_fn = exp_backward
         return out
 
+    def transpose(self):
+        return Tensor(self.arr.T, requires_grad=self.requires_grad, _graph=self._graph)
+
+    @property
+    def T(self):
+        return self.transpose()
+
+    def mean(self, **kwargs):
+        return Tensor(
+            self.arr.mean(**kwargs),
+            requires_grad=self.requires_grad,
+            _graph=self._graph,
+        )
+
     def _get_topsorted_graph(self):
         topsorted_graph = []
 
@@ -185,10 +199,10 @@ class Tensor:
                 queue.append(prev)
 
         return topsorted_graph
-    
+
     def __array__(self):
         return self.arr
-    
+
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         if method == "__call__":
             unwrapped_inputs = []
@@ -200,6 +214,14 @@ class Tensor:
             return Tensor(ufunc(*unwrapped_inputs, **kwargs))
         else:
             return NotImplemented
+
+    def __array_function__(self, func, types, args, kwargs):
+        from .functional import HANDLED_FUNCS
+
+        if func not in HANDLED_FUNCS:
+            return NotImplemented
+
+        return HANDLED_FUNCS[func](*args, **kwargs)
 
     def __getitem__(self, key):
         return Tensor(self.arr.__getitem__(key))
